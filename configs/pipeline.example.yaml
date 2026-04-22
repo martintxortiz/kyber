@@ -1,0 +1,12 @@
+region: emea
+tier: vct
+date_start: 2026-04-01
+date_end: 2026-04-30
+output_root: data
+max_requests_per_minute: 30
+retry_count: 2
+retry_backoff_seconds: 2
+resume_enabled: true
+refresh_existing: false
+log_level: INFO
+run_name: emea_vct_april_2026_example
