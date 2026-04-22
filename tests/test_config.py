@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 
 from src.config import ConfigError, load_config
+from src.parse_helpers import parse_date_range
 
 
 VALID_CONFIG = """\
@@ -50,6 +51,16 @@ class ConfigTests(unittest.TestCase):
             config_path.write_text(bad_config, encoding="utf-8")
             with self.assertRaises(ConfigError):
                 load_config(config_path)
+
+    def test_parse_date_range_supports_old_vlr_format(self) -> None:
+        self.assertEqual(
+            parse_date_range("Apr 10 - 18, 2021"),
+            ("2021-04-10", "2021-04-18"),
+        )
+        self.assertEqual(
+            parse_date_range("Apr 23 - May 2, 2021"),
+            ("2021-04-23", "2021-05-02"),
+        )
 
 
 if __name__ == "__main__":

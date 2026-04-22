@@ -76,12 +76,35 @@ def parse_date_range(text: str) -> tuple[str | None, str | None]:
     if not cleaned:
         return None, None
 
-    if " - " in cleaned:
-        start_raw, end_raw = cleaned.split(" - ", 1)
-    else:
-        return None, None
+    normalized = cleaned.replace("—", "-").replace("–", "-")
+    normalized = re.sub(r"\s*-\s*", " - ", normalized)
 
-    return _parse_single_date(start_raw), _parse_single_date(end_raw)
+    range_match = re.match(
+        r"^(?P<smonth>[A-Za-z]+)\s+(?P<sday>\d{1,2})(?:,\s*(?P<syear>\d{4}))?"
+        r"\s+-\s+"
+        r"(?:(?P<emonth>[A-Za-z]+)\s+)?(?P<eday>\d{1,2})(?:,\s*(?P<eyear>\d{4}))?$",
+        normalized,
+    )
+    if range_match:
+        start_month = range_match.group("smonth")
+        start_day = range_match.group("sday")
+        end_month = range_match.group("emonth") or start_month
+        end_day = range_match.group("eday")
+        end_year = range_match.group("eyear")
+        start_year = range_match.group("syear") or end_year
+
+        if start_year and end_year:
+            return (
+                _parse_single_date(f"{start_month} {start_day}, {start_year}"),
+                _parse_single_date(f"{end_month} {end_day}, {end_year}"),
+            )
+
+    if " - " in normalized:
+        start_raw, end_raw = normalized.split(" - ", 1)
+        return _parse_single_date(start_raw), _parse_single_date(end_raw)
+
+    parsed_single = _parse_single_date(normalized)
+    return parsed_single, parsed_single
 
 
 def _parse_single_date(text: str) -> str | None:
